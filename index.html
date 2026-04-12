@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo Card</title>
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+ 
+</head>
+<body>
+
+  <article
+    data-testid="test-todo-card"
+    aria-label="Todo task card"
+  >
+    <div class="card-top">
+      <div class="checkbox-wrap">
+        <input
+          type="checkbox"
+          id="todo-complete"
+          data-testid="test-todo-complete-toggle"
+          aria-label="Mark task as complete"
+        />
+        <label for="todo-complete">Mark as complete</label>
+      </div>
+
+      <div class="title-row">
+        <h2 data-testid="test-todo-title">Redesign the onboarding flow</h2>
+        <span
+          data-testid="test-todo-priority"
+          class="priority-badge priority-medium"
+          aria-label="Priority: Medium"
+        >
+          <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+          Medium
+        </span>
+      </div>
+    </div>
+
+    <p data-testid="test-todo-description">
+      Update the user onboarding screens to match the new brand guidelines.
+      Include revised copy, updated illustrations, and the new CTA button styles.
+    </p>
+
+    <div class="divider"></div>
+
+    <div class="meta-row">
+      <div class="due-date-wrap">
+        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+        <time
+          data-testid="test-todo-due-date"
+          datetime="2026-05-01T18:00:00Z"
+        >
+          Due May 1, 2026
+        </time>
+      </div>
+
+      <span
+        data-testid="test-todo-status"
+        id="todo-status"
+        class="status-badge status-progress"
+        aria-label="Status: In Progress"
+      >
+        <i class="fa-regular fa-circle-dot" aria-hidden="true"></i>
+        In Progress
+      </span>
+    </div>
+
+    <div
+      data-testid="test-todo-time-remaining"
+      id="todo-time-remaining"
+      class="time-row"
+      aria-live="polite"
+    >
+      <i class="fa-regular fa-clock" aria-hidden="true"></i>
+      <span id="time-remaining-text">Calculating...</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <ul
+      data-testid="test-todo-tags"
+      class="tags-list"
+      role="list"
+      aria-label="Task tags"
+    >
+      <li data-testid="test-todo-tag-work">
+        <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+        work
+      </li>
+      <li data-testid="test-todo-tag-urgent">
+        <i class="fa-solid fa-fire" aria-hidden="true"></i>
+        urgent
+      </li>
+      <li>
+        <i class="fa-solid fa-pen-ruler" aria-hidden="true"></i>
+        design
+      </li>
+    </ul>
+
+    <div class="divider"></div>
+
+   <div class="card-footer">
+  <p class="footer-hint">
+    <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
+    Tick checkbox when task is done
+  </p>
+  <div class="footer-buttons">
+    <button
+      data-testid="test-todo-edit-button"
+      aria-label="Edit task"
+      onclick="handleEdit()"
+    >
+      <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+      Edit
+    </button>
+    <button
+      data-testid="test-todo-delete-button"
+      class="btn-delete"
+      aria-label="Delete task"
+      onclick="handleDelete()"
+    >
+      <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+      Delete
+    </button>
+  </div>
+</div>
+  </article>
+
+  <script>
+    const dueDate = new Date('2026-05-01T18:00:00Z');
+    function updateTimeRemaining() {
+      const now = new Date();
+      const diffMs = dueDate - now;
+      const diffMins = Math.round(diffMs / 60000);
+      const diffHours = Math.round(diffMs / 3600000);
+      const diffDays = Math.round(diffMs / 86400000);
+
+      const el = document.getElementById('todo-time-remaining');
+      const textEl = document.getElementById('time-remaining-text');
+
+      let text = '';
+
+      if (diffMins <= -1440) {
+        text = 'Overdue by ' + Math.abs(diffDays) + ' days';
+        el.className = 'time-row overdue';
+      } else if (diffMins < -60) {
+        text = 'Overdue by ' + Math.abs(diffHours) + ' hours';
+        el.className = 'time-row overdue';
+      } else if (diffMins < 0) {
+        text = 'Overdue by ' + Math.abs(diffMins) + ' minutes';
+        el.className = 'time-row overdue';
+      } else if (diffMins <= 60) {
+        text = 'Due now!';
+        el.className = 'time-row due-soon';
+      } else if (diffHours < 24) {
+        text = 'Due in ' + diffHours + ' hours';
+        el.className = 'time-row due-soon';
+      } else if (diffDays === 1) {
+        text = 'Due tomorrow';
+        el.className = 'time-row due-soon';
+      } else {
+        text = 'Due in ' + diffDays + ' days';
+        el.className = 'time-row';
+      }
+
+      textEl.textContent = text;
+    }
+
+    updateTimeRemaining();
+    setInterval(updateTimeRemaining, 60000);
+    const checkbox = document.getElementById('todo-complete');
+    const card = document.querySelector('[data-testid="test-todo-card"]');
+    const statusEl = document.getElementById('todo-status');
+
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        card.classList.add('is-complete');
+        statusEl.className = 'status-badge status-done';
+        statusEl.setAttribute('aria-label', 'Status: Done');
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Done';
+      } else {
+        card.classList.remove('is-complete');
+        statusEl.className = 'status-badge status-progress';
+        statusEl.setAttribute('aria-label', 'Status: In Progress');
+        statusEl.innerHTML = '<i class="fa-regular fa-circle-dot" aria-hidden="true"></i> In Progress';
+      }
+    });
+    
+    function handleEdit() {
+      console.log('edit clicked');
+    }
+
+    function handleDelete() {
+      alert('Delete clicked');
+    }
+  </script>
+
+</body>
+</html>
